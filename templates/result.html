@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Result | Suspicious Activity Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animate.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+</head>
+<body>
+    <div class="container result-container animate__animated animate__fadeIn">
+        <h1 class="title">Activity Analysis Result</h1>
+        
+        <div class="result-content">
+            <div class="video-preview">
+                <video controls>
+                    <source src="{{ url_for('static', filename='uploads/' + video_file) }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            <div class="prediction-result">
+                <div class="result-card">
+                    <h2>Detected Activity</h2>
+                    <div class="activity-badge">{{ activity }}</div>
+                    <p class="confidence">Confidence: {{ (confidence * 100)|round(2) }}%</p>
+                </div>
+                
+                <div class="confidence-chart">
+                    <h3>Confidence Distribution</h3>
+                    <canvas id="confChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <a href="/" class="back-btn">Analyze Another Video</a>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('confChart').getContext('2d');
+        const confidences = {{ confidences|tojson }};
+        
+        const data = {
+            labels: Object.keys(confidences),
+            datasets: [{
+                label: 'Confidence Level',
+                data: Object.values(confidences).map(v => v * 100),
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        };
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Confidence (%)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
